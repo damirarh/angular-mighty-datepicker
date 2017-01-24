@@ -42,6 +42,7 @@
       $scope.multi = [moment(), moment().add(2, 'day'), moment().add(5, 'day')];
       $scope.mark = moment();
       $scope.options = {months: 1, after: moment(), template: template};
+      $scope.optionsOutsideMonth = {months: 1, interactOutsideMonth: true, after: moment(), template: template};
       $scope.optionsM = {start: moment().add(-1, 'month'), months: 3, mode: "multiple", callback: _callthis, filter: _filter};
       $scope.optionsMAfter = moment().add(-1, 'month');
       $scope.optionsK = {months: 1};
@@ -74,7 +75,7 @@
     <div>
       <h1>Simple date picker</h1>
       <mighty-datepicker ng-model="date" options="options"></mighty-datepicker>
-      <mighty-datepicker ng-model="date" options="options"></mighty-datepicker>
+      <mighty-datepicker ng-model="date" options="optionsOutsideMonth"></mighty-datepicker>
       <pre>
         {{date | json}}
       </pre>
