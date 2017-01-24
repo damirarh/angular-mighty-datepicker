@@ -56,6 +56,14 @@
       $scope.dateDbB =  moment().add(2, 'day');
       $scope.optionsDbB = {};
 
+      $scope.optionsRange = {
+        mode: "range",
+        months: 1,
+        maxRangeLength: 6,
+        interactOutsideMonth: true
+      };
+      $scope.selectedRange = null;
+
       $scope.addMarker = function() {
         $scope.markers.push({day: $scope.mark, marker: 'new marker'});
       }
@@ -102,6 +110,16 @@
       <mighty-datepicker ng-model="dateDbA" options="optionsDbA" before="dateDbB" range-from="true" style="display: inline-block"></mighty-datepicker>
       <mighty-datepicker ng-model="dateDbB" options="optionsDbB" after="dateDbA" range-to="true" style="display: inline-block"></mighty-datepicker>
     </div>
+    <div>
+      <h1>Single datepicker for data range?</h1>
+      <mighty-datepicker ng-model="selectedRange" options="optionsRange" style="display: inline-block"></mighty-datepicker>
+    </div>
+    <pre>
+      {{ selectedRange.start | json}}
+    </pre>
+    <pre>
+      {{ selectedRange.end | json}}
+    </pre>
   </div>
 </body>
 </html>
