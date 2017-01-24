@@ -22,6 +22,7 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ["$compile", ($
                 bo-class='{
                   "mighty-picker-calendar__day": day,
                   "mighty-picker-calendar__day--selected": day.selected,
+                  "mighty-picker-calendar__day--outside-month": !day.withinMonth,
                   "mighty-picker-calendar__day--disabled": day.disabled,
                   "mighty-picker-calendar__day--in-range": day.inRange,
                   "mighty-picker-calendar__day--marked": day.marker
@@ -48,6 +49,7 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ["$compile", ($
   options =
     mode: "simple"
     months: 1
+    interactOutsideMonth: false
     start: null
     filter: undefined
     callback: undefined
@@ -117,10 +119,11 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ["$compile", ($
         withinLimits = _withinLimits(day, month)
         filter = $scope.options.filter(day) if $scope.options.filter
         date: day
-        selected: _isSelected(day) && withinMonth
+        selected: _isSelected(day) && (withinMonth || $scope.options.interactOutsideMonth)
         inRange: _isInRange(day)
-        disabled: !(withinLimits && withinMonth && filter)
-        marker: _getMarker(day) if withinMonth
+        withinMonth: withinMonth && $scope.options.interactOutsideMonth
+        disabled: !(withinLimits && (withinMonth || $scope.options.interactOutsideMonth) && filter)
+        marker: _getMarker(day) if (withinMonth || $scope.options.interactOutsideMonth)
       days
 
     _buildMonth = (time) ->
