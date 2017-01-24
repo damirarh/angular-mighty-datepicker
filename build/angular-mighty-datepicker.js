@@ -8,6 +8,7 @@
       options = {
         mode: "simple",
         months: 1,
+        maxRangeLength: -1,
         interactOutsideMonth: false,
         start: null,
         filter: void 0,
@@ -84,6 +85,8 @@
             switch ($scope.options.mode) {
               case "multiple":
                 return _indexOfMoment($scope.model, day, 'day') > -1;
+              case "range":
+                return $scope.model && $scope.model.contains(day);
               default:
                 return $scope.model && day.isSame($scope.model, 'day');
             }
@@ -144,7 +147,7 @@
             };
           };
           _setup = function() {
-            var attr, dates, start, tempOptions, v, _ref;
+            var attr, dates, start, tempOptions, v, _ref, _ref1, _ref2;
             tempOptions = {};
             for (attr in options) {
               v = options[attr];
@@ -169,6 +172,11 @@
                   }
                 } else {
                   $scope.model = [];
+                }
+                break;
+              case "range":
+                if (!((((_ref1 = $scope.model) != null ? _ref1.start : void 0) != null) && (((_ref2 = $scope.model) != null ? _ref2.end : void 0) != null))) {
+                  $scope.model = null;
                 }
                 break;
               default:
@@ -206,7 +214,7 @@
             _prepare();
           };
           $scope.select = function(day) {
-            var ix;
+            var ix, maxEnd, minStart;
             if (!day.disabled) {
               switch ($scope.options.mode) {
                 case "multiple":
@@ -215,6 +223,27 @@
                     $scope.model.splice(ix, 1);
                   } else {
                     $scope.model.push(moment(day.date));
+                  }
+                  break;
+                case "range":
+                  if ($scope.model === null) {
+                    $scope.model = moment.range(day.date.clone().startOf('day'), day.date.clone().endOf('day'));
+                  } else if (day.date.isBefore($scope.model.start)) {
+                    $scope.model.start = day.date.clone().startOf('day');
+                    if ($scope.options.maxRangeLength >= 0) {
+                      maxEnd = $scope.model.start.clone().add($scope.options.maxRangeLength, 'days').endOf('day');
+                      if (maxEnd.isBefore($scope.model.end)) {
+                        $scope.model.end = maxEnd;
+                      }
+                    }
+                  } else if (day.date.isAfter($scope.model.end)) {
+                    $scope.model.end = day.date.clone().endOf('day');
+                    if ($scope.options.maxRangeLength >= 0) {
+                      minStart = $scope.model.end.clone().subtract($scope.options.maxRangeLength, 'days').startOf('day');
+                      if (minStart.isAfter($scope.model.start)) {
+                        $scope.model.start = minStart;
+                      }
+                    }
                   }
                   break;
                 default:
@@ -235,6 +264,11 @@
           switch ($scope.options.mode) {
             case "multiple":
               $scope.$watchCollection('model', function(newVals, oldVals) {
+                return _prepare();
+              });
+              break;
+            case "range":
+              $scope.$watchCollection('model', function() {
                 return _prepare();
               });
               break;

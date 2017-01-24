@@ -49,6 +49,7 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ["$compile", ($
   options =
     mode: "simple"
     months: 1
+    maxRangeLength: -1
     interactOutsideMonth: false
     start: null
     filter: undefined
@@ -97,6 +98,8 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ["$compile", ($
       switch $scope.options.mode
         when "multiple"
           return _indexOfMoment($scope.model, day, 'day') > -1
+        when "range"
+          return $scope.model && $scope.model.contains(day)
         else
           return $scope.model && day.isSame($scope.model, 'day')
 
@@ -160,6 +163,9 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ["$compile", ($
               start = moment(dates.sort().slice(-1)[0])
           else
             $scope.model = []
+        when "range"
+          if not ($scope.model?.start? and $scope.model?.end?)
+            $scope.model = null
         else
           start = moment($scope.model) if $scope.model
 
@@ -199,6 +205,21 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ["$compile", ($
               $scope.model.splice(ix, 1)
             else
               $scope.model.push(moment(day.date))
+          when "range"
+            if $scope.model == null
+              $scope.model = moment.range(day.date.clone().startOf('day'), day.date.clone().endOf('day'))
+            else if day.date.isBefore($scope.model.start)
+              $scope.model.start = day.date.clone().startOf('day')
+              if $scope.options.maxRangeLength >= 0
+                maxEnd = $scope.model.start.clone().add($scope.options.maxRangeLength, 'days').endOf('day')
+                if maxEnd.isBefore($scope.model.end)
+                  $scope.model.end = maxEnd
+            else if day.date.isAfter($scope.model.end)
+              $scope.model.end = day.date.clone().endOf('day')
+              if $scope.options.maxRangeLength >= 0
+                minStart = $scope.model.end.clone().subtract($scope.options.maxRangeLength, 'days').startOf('day')
+                if minStart.isAfter($scope.model.start)
+                  $scope.model.start = minStart
           else
             $scope.model = day.date
         $scope.options.callback day.date if $scope.options.callback
@@ -214,6 +235,10 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ["$compile", ($
     switch $scope.options.mode
       when "multiple"
         $scope.$watchCollection 'model', (newVals, oldVals) ->
+          _prepare()
+
+      when "range"
+        $scope.$watchCollection 'model', ->
           _prepare()
 
       when "simple"
