@@ -142,6 +142,7 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ["$compile", ($
       name: time.format("MMMM YYYY")
 
     _setup = ->
+      $scope.firstClick = true
       tempOptions = {}
       for attr, v of options
         tempOptions[attr] = v
@@ -206,7 +207,7 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ["$compile", ($
             else
               $scope.model.push(moment(day.date))
           when "range"
-            if $scope.model == null
+            if $scope.firstClick
               $scope.model = moment.range(day.date.clone().startOf('day'), day.date.clone().endOf('day'))
             else if day.date.isBefore($scope.model.start)
               $scope.model.start = day.date.clone().startOf('day')
@@ -220,6 +221,7 @@ angular.module("mightyDatepicker").directive "mightyDatepicker", ["$compile", ($
                 minStart = $scope.model.end.clone().subtract($scope.options.maxRangeLength, 'days').startOf('day')
                 if minStart.isAfter($scope.model.start)
                   $scope.model.start = minStart
+            $scope.firstClick = not $scope.firstClick
           else
             $scope.model = day.date
         $scope.options.callback day.date if $scope.options.callback

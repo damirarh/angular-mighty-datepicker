@@ -148,6 +148,7 @@
           };
           _setup = function() {
             var attr, dates, start, tempOptions, v, _ref, _ref1, _ref2;
+            $scope.firstClick = true;
             tempOptions = {};
             for (attr in options) {
               v = options[attr];
@@ -226,7 +227,7 @@
                   }
                   break;
                 case "range":
-                  if ($scope.model === null) {
+                  if ($scope.firstClick) {
                     $scope.model = moment.range(day.date.clone().startOf('day'), day.date.clone().endOf('day'));
                   } else if (day.date.isBefore($scope.model.start)) {
                     $scope.model.start = day.date.clone().startOf('day');
@@ -245,6 +246,7 @@
                       }
                     }
                   }
+                  $scope.firstClick = !$scope.firstClick;
                   break;
                 default:
                   $scope.model = day.date;
